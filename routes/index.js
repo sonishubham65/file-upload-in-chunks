@@ -9,7 +9,6 @@ router.get('/', function (req, res, next) {
 });
 
 
-var Chunks = [];
 var Nonces = {};
 /**
  * @description: Create a nonce for new upload
@@ -22,21 +21,48 @@ router.post('/nonce', function (req, res, next) {
       filename: uuidv1() + filename,
       size: size
     }
-    Chunks[nonce] = {};
     res.status(200).json({ success: true, nonce: nonce })
   } catch (e) {
     console.log(e)
     res.status(500).json({ success: false, message: e.message });
   }
 })
+
+router.get('/nonce', function (req, res, next) {
+  try {
+    const { nonce } = req.query;
+    if (Nonces[nonce]) {
+      let fileName = `public/images/${Nonces[nonce].filename}.lock`;
+      if (!fs.existsSync(fileName)) {
+        throw new Error("Invalid file, restart the process..");
+      }
+      var stat = fs.statSync(fileName);
+      res.status(200).json({ size: stat.size })
+    } else {
+      throw new Error("Invalid nonce..")
+    }
+  } catch (e) {
+    res.status(500).json({ success: false, message: e.message });
+  }
+})
+
 /**
  * @description: Save all chunks with respect to nonce
  */
 router.post('/upload', function (req, res, next) {
   try {
-    const { nonce, start, end, file } = req.body;
-    Chunks[nonce][end] = file;
-    res.status(200).json({ success: true });
+    const { nonce, chunk } = req.body;
+    if (Nonces[nonce]) {
+      let fileName = `public/images/${Nonces[nonce].filename}.lock`;
+      const fileStream = fs.createWriteStream(fileName, { flags: 'a' });
+      let data = Buffer.from(chunk.split(`;base64,`)[1], 'base64');
+      fileStream.write(data);
+
+      res.status(200).json({ success: true });
+    } else {
+      throw new Error("Invalid nonce..")
+    }
+
   } catch (e) {
     res.status(500).json({ success: false, message: e.message });
   }
@@ -47,22 +73,16 @@ router.post('/upload', function (req, res, next) {
  */
 router.post('/save', function (req, res, next) {
   try {
-    const { nonce, filename } = req.body;
+    const { nonce } = req.body;
     let fileName = `public/images/${Nonces[nonce].filename}`;
-
-    const fileStream = fs.createWriteStream(fileName, { flags: 'a' });
-
-    Object.keys(Chunks[nonce]).forEach(key => {
-      let chunk = Chunks[nonce][key];
-      let data = Buffer.from(chunk.split(`;base64,`)[1], 'base64');
-      fileStream.write(data);
-    });
-
+    fs.renameSync(`${fileName}.lock`, fileName);
     res.status(200).json({ success: true });
   } catch (e) {
     res.status(500).json({ success: false, message: e.message });
   }
 
 });
+
+
 
 module.exports = router;
