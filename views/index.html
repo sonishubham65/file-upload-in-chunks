@@ -1,0 +1,43 @@
+<html>
+
+<head>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" rel="stylesheet" />
+</head>
+
+<body>
+    <div class="jumbotron">
+        <h1 class="display-4">Hello, Youser!</h1>
+        <p class="lead">Uploading large files to the cloud can be difficult and frustrating. Spotty or weak HTTP
+            connections mean uploads can take far too long to complete. Or worse, your requests time out and leave users
+            with no choice but to start the entire upload over again..</p>
+        <hr class="my-4">
+        <p>Introducing the Chunked Uploads API.</p>
+        <p class="lead">
+            <form id="video">
+                <input name="file" type="file" />
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
+        </p>
+    </div>
+
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js" crossorigin="anonymous"></script>
+    <script src="public/javascripts/chunk.js"></script>
+    <script>
+        $(document).ready(e => {
+            $("#video").submit(async e => {
+                e.preventDefault();
+                try {
+                    const file = $("input[name=file]")[0].files[0];
+                    let upload = new Upload(file);
+                    await upload.createNonce();
+                    await upload.upload();
+                } catch (e) {
+                    console.log(e)
+                }
+            })
+        })
+    </script>
+</body>
+
+</html>
