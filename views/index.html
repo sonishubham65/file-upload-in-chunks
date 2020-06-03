@@ -22,22 +22,7 @@
 
 
     <script src="https://code.jquery.com/jquery-3.5.1.min.js" crossorigin="anonymous"></script>
-    <script src="public/javascripts/chunk.js"></script>
-    <script>
-        $(document).ready(e => {
-            $("#video").submit(async e => {
-                e.preventDefault();
-                try {
-                    const file = $("input[name=file]")[0].files[0];
-                    let upload = new Upload(file);
-                    await upload.createNonce();
-                    await upload.upload();
-                } catch (e) {
-                    console.log(e)
-                }
-            })
-        })
-    </script>
+    <script type="module" src="javascripts/chunk.js"></script>
 </body>
 
 </html>

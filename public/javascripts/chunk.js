@@ -83,3 +83,18 @@ class Upload {
         })
     }
 }
+
+
+$(document).ready(e => {
+    $("#video").submit(async e => {
+        e.preventDefault();
+        try {
+            const file = $("input[name=file]")[0].files[0];
+            let upload = new Upload(file);
+            await upload.createNonce();
+            await upload.upload();
+        } catch (e) {
+            console.log(e)
+        }
+    })
+})
