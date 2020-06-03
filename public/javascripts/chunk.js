@@ -2,11 +2,11 @@ class Upload {
     nonce;
     file;
     start = 0;
-    chunk = 10000;
+    chunk = 50000;
     end = this.chunk;
     reader = new FileReader();
-    event;
     progress = 0;
+    ajax = {}
 
     constructor(file, chunk = 0) {
         this.file = file;
@@ -15,15 +15,15 @@ class Upload {
         }
         this.reader.onloadend = (e) => {
             this.progress = this.start / this.file.size
-            console.log(this.progress);
+            $("#progress").text((this.progress * 100).toFixed(2));
         }
         this.reader.onload = (e) => {
-            $.ajax("/upload", {
+            this.ajax.upload = $.ajax("/upload", {
                 data: {
                     start: this.start,
                     end: this.end,
                     nonce: this.nonce,
-                    file: e.target.result
+                    chunk: e.target.result
                 },
                 dataType: 'json',
                 method: 'post',
@@ -61,7 +61,11 @@ class Upload {
         if (this.start < this.file.size) {
             var blob = this.file.slice(this.start, this.end);
             this.reader.readAsDataURL(blob);
+
+
         } else {
+            this.progress = 1;
+            $("#progress").text((this.progress * 100).toFixed(2));
             await this.save();
         }
     }
@@ -69,11 +73,14 @@ class Upload {
      * @descrition: Save chunks in a file. 
      */
     save() {
+        $("#upload").removeClass("d-none");
+        $("#pause").addClass("d-none");
+        $("#resume").addClass("d-none");
+
         return new Promise((resolve, reject) => {
             $.ajax("/save", {
                 data: {
-                    nonce: this.nonce,
-                    filename: this.file.name
+                    nonce: this.nonce
                 },
                 dataType: 'json',
                 method: 'post',
@@ -82,19 +89,54 @@ class Upload {
             });
         })
     }
+
+    pause() {
+        this.ajax.upload.abort();
+    }
+    resume() {
+        this.Pause = false;
+        $.ajax("/nonce", {
+            data: {
+                nonce: this.nonce
+            },
+            dataType: 'json',
+            method: 'get',
+        }).done((data) => {
+            this.start = data.size;
+            this.end = this.start + this.chunk;
+            this.upload();
+        }).fail(e => {
+            console.log(e)
+        });
+    }
 }
 
 
 $(document).ready(e => {
-    $("#video").submit(async e => {
+    let upload;
+    $("#upload").click(async e => {
         e.preventDefault();
+        $("#upload").addClass("d-none");
+        $("#pause").removeClass("d-none");
         try {
             const file = $("input[name=file]")[0].files[0];
-            let upload = new Upload(file);
+            upload = new Upload(file);
             await upload.createNonce();
             await upload.upload();
         } catch (e) {
             console.log(e)
         }
-    })
+    });
+    $("#pause").click(async e => {
+        $("#pause").addClass("d-none");
+        $("#resume").removeClass("d-none");
+        e.preventDefault();
+        upload.pause();
+    });
+    $("#resume").click(async e => {
+        $("#pause").removeClass("d-none");
+        $("#resume").addClass("d-none");
+        e.preventDefault();
+        upload.resume();
+    });
 })
