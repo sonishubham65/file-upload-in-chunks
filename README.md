@@ -1,5 +1,10 @@
-# file-upload-in-chunks
+# File upload and Camera stream in chunks
+> Author: [Shubham](http://sonishubham.com/)
 
-
-<p>Clone or Download and unzip.</p>
-<p>Run cmd "node app.js
+### RUN
+```
+> Clone or Download and unzip.
+> Run cmd "node app.js
+> localhost:3000
+localhost:3000/camera
+```
