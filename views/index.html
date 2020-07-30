@@ -6,20 +6,19 @@
 
 <body>
     <div class="jumbotron">
-        <h1 class="display-4">Hello, Youser!</h1>
-        <p class="lead">Uploading large files to the cloud can be difficult and frustrating. Spotty or weak HTTP
-            connections mean uploads can take far too long to complete. Or worse, your requests time out and leave users
-            with no choice but to start the entire upload over again..</p>
+        <h1 class="display-4">Hello, user!</h1>
+        <p class="lead">Uploading large file in chunks..</p>
         <hr class="my-4">
+        <p>Check public/image/ folder</p>
         <p>Introducing the Chunked Uploads API.</p>
         <p class="lead">
-            <form id="video">
-                <input name="file" type="file" />
-                <button class="btn btn-primary" id="upload">Submit</button>
-                <button class="d-none btn btn-danger" id="pause">Pause</button>
-                <button class="d-none btn btn-warning" id="resume">Resume</button>
-            </form>
-            <p>Progress: <span id="progress"></span></p>
+        <form id="video">
+            <input name="file" type="file" />
+            <button class="btn btn-primary" id="upload">Submit</button>
+            <button class="d-none btn btn-danger" id="pause">Pause</button>
+            <button class="d-none btn btn-warning" id="resume">Resume</button>
+        </form>
+        <p>Progress: <span id="progress"></span></p>
         </p>
     </div>
     <script src="https://code.jquery.com/jquery-3.5.1.min.js" crossorigin="anonymous"></script>

@@ -8,6 +8,10 @@ router.get('/', function (req, res, next) {
   res.render('index', { title: 'Express' });
 });
 
+router.get('/camera', function (req, res, next) {
+  res.render('camera');
+});
+
 
 var Nonces = {};
 /**
@@ -32,7 +36,7 @@ router.get('/nonce', function (req, res, next) {
   try {
     const { nonce } = req.query;
     if (Nonces[nonce]) {
-      let fileName = `public/images/${Nonces[nonce].filename}.lock`;
+      let fileName = `public/images/${Nonces[nonce].filename}`;
       if (!fs.existsSync(fileName)) {
         throw new Error("Invalid file, restart the process..");
       }
@@ -53,7 +57,7 @@ router.post('/upload', function (req, res, next) {
   try {
     const { nonce, chunk } = req.body;
     if (Nonces[nonce]) {
-      let fileName = `public/images/${Nonces[nonce].filename}.lock`;
+      let fileName = `public/images/${Nonces[nonce].filename}`;
       const fileStream = fs.createWriteStream(fileName, { flags: 'a' });
       let data = Buffer.from(chunk.split(`;base64,`)[1], 'base64');
       fileStream.write(data);
@@ -75,8 +79,7 @@ router.post('/save', function (req, res, next) {
   try {
     const { nonce } = req.body;
     let fileName = `public/images/${Nonces[nonce].filename}`;
-    fs.renameSync(`${fileName}.lock`, fileName);
-    res.status(200).json({ success: true });
+    res.status(200).json({ success: true, a: 1, name: Nonces[nonce].filename });
   } catch (e) {
     res.status(500).json({ success: false, message: e.message });
   }
