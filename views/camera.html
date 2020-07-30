@@ -1,0 +1,94 @@
+<html>
+
+<head>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" rel="stylesheet" />
+    <style>
+        #video {
+            max-width: 300px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="jumbotron">
+        <h1 class="display-4">Hello, user!</h1>
+        <p class="lead">Upload screen stream..</p>
+        <hr class="my-4">
+        <p>Check public/image/ folder</p>
+        <video id="video" autoplay="true"></video>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js" crossorigin="anonymous"></script>
+    <script>
+        let recordingStack = [];
+        let nonce;
+        let reader;
+        $(document).ready(async e => {
+
+            nonce = await new Promise((resolve, reject) => {
+                $.ajax("http://localhost:3000/nonce", {
+                    data: {
+                        filename: "xx.mp4"
+                    },
+                    dataType: 'json',
+                    method: 'post',
+                }).done((data) => {
+                    resolve(data.nonce);
+                }).fail(e => {
+                    reject(e)
+                });
+            });
+            reader = new FileReader();
+            reader.onload = (e) => {
+                $.ajax("http://localhost:3000/upload", {
+                    data: {
+                        nonce: nonce,
+                        chunk: e.target.result
+                    },
+                    dataType: 'json',
+                    method: 'post',
+                }).done((data) => {
+
+                });
+            }
+            let video = document.getElementById("video");
+            navigator.mediaDevices.getUserMedia({ video: { width: 1920, height: 1080 }, audio: true }).then(async stream => {
+                video.srcObject = stream;
+
+                let options = { mimeType: 'video/webm; codecs=vp9' };
+
+                let mediaRecorder = new MediaRecorder(stream, options);
+                mediaRecorder.ondataavailable = event => {
+                    console.log("ondataavailable", mediaRecorder.state, event);
+
+                    recordingStack.push(event.data);
+                    readStack();
+
+                }
+
+                mediaRecorder.requestData = event => {
+                    console.log("requestData", event)
+                }
+                mediaRecorder.onerror = event => {
+                    console.log("onerror", event)
+                }
+                mediaRecorder.start(1000);
+
+            });
+        })
+
+        function readStack() {
+            console.log(recordingStack.length)
+            let blob = recordingStack.shift();
+            if (blob) {
+                console.log(recordingStack.length)
+                //blob = new Blob(blob, { type: 'video/webm' });
+                console.log(blob)
+                reader.readAsDataURL(blob);
+            }
+
+        }
+
+    </script>
+</body>
+
+</html>

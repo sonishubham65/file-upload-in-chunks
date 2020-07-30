@@ -18,6 +18,7 @@ class Upload {
             $("#progress").text((this.progress * 100).toFixed(2));
         }
         this.reader.onload = (e) => {
+            console.log(e, e.target.result)
             this.ajax.upload = $.ajax("/upload", {
                 data: {
                     start: this.start,
@@ -61,8 +62,6 @@ class Upload {
         if (this.start < this.file.size) {
             var blob = this.file.slice(this.start, this.end);
             this.reader.readAsDataURL(blob);
-
-
         } else {
             this.progress = 1;
             $("#progress").text((this.progress * 100).toFixed(2));

@@ -1,0 +1,7 @@
+
+.git
+/Dockerfile
+/node_modules
+npm-debug.log
+#/public/images/*
+docker-data
